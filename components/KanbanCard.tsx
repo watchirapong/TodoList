@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Todo } from "@/lib/types";
@@ -11,11 +12,26 @@ interface KanbanCardProps {
   onOpenDetail?: (todo: Todo) => void;
 }
 
+function useCoarsePointer() {
+  const [isCoarse, setIsCoarse] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse)");
+    const update = () => setIsCoarse(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return isCoarse;
+}
+
 export default function KanbanCard({
   todo,
   onDelete,
   onOpenDetail,
 }: KanbanCardProps) {
+  const isCoarsePointer = useCoarsePointer();
   const {
     attributes,
     listeners,
@@ -33,7 +49,7 @@ export default function KanbanCard({
   const urgent = isNearDeadline(todo.deadline);
   const hasDescription = Boolean(todo.description?.trim());
 
-  function handleDoubleClick() {
+  function handleOpenDetail() {
     if (!onOpenDetail || isDragging) return;
     onOpenDetail(todo);
   }
@@ -53,7 +69,7 @@ export default function KanbanCard({
       <div className="flex items-start gap-2">
         <button
           type="button"
-          className="mt-0.5 shrink-0 cursor-grab touch-none text-slate-300 hover:text-slate-500 active:cursor-grabbing"
+          className="flex min-h-11 min-w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-slate-300 hover:text-slate-500 active:cursor-grabbing"
           aria-label={`Drag "${todo.text}"`}
           {...attributes}
           {...listeners}
@@ -74,9 +90,16 @@ export default function KanbanCard({
         </button>
 
         <div
-          className="min-w-0 flex-1 cursor-text"
-          onDoubleClick={handleDoubleClick}
-          title={onOpenDetail ? "Double-click to edit" : undefined}
+          className="min-w-0 flex-1 cursor-pointer"
+          onClick={isCoarsePointer ? handleOpenDetail : undefined}
+          onDoubleClick={!isCoarsePointer ? handleOpenDetail : undefined}
+          title={
+            onOpenDetail
+              ? isCoarsePointer
+                ? "Tap to edit"
+                : "Double-click to edit"
+              : undefined
+          }
         >
           <div className="flex items-start gap-1.5">
             <span
@@ -126,7 +149,7 @@ export default function KanbanCard({
           type="button"
           onClick={() => onDelete(todo._id)}
           aria-label={`Delete "${todo.text}"`}
-          className="shrink-0 rounded-md p-1 text-slate-300 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-500 group-hover:opacity-100 focus:opacity-100"
+          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-500 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
         >
           <svg
             className="h-3.5 w-3.5"

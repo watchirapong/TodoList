@@ -47,7 +47,7 @@ export default function CardDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="card-detail-title"
@@ -61,7 +61,7 @@ export default function CardDetailModal({
 
       <form
         onSubmit={handleSubmit}
-        className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60"
+        className="relative z-10 max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:rounded-2xl"
       >
         <h2
           id="card-detail-title"

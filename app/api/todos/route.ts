@@ -7,13 +7,15 @@ import {
   parseDescriptionInput,
   serializeTodo,
 } from "@/lib/todo-utils";
+import { getOrCreateUserId } from "@/lib/user-id";
 import Todo from "@/models/Todo";
 
 export async function GET() {
   try {
+    const userId = await getOrCreateUserId();
     await connectDB();
     await migrateTodos();
-    const todos = await Todo.find().sort({ createdAt: -1 });
+    const todos = await Todo.find({ userId }).sort({ createdAt: -1 });
     return NextResponse.json({
       todos: todos.map(serializeTodo),
     });
@@ -27,6 +29,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const userId = await getOrCreateUserId();
     const body = await request.json();
     const text = typeof body.text === "string" ? body.text.trim() : "";
 
@@ -70,6 +73,7 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
     const todo = await Todo.create({
+      userId,
       text,
       status,
       ...(descriptionResult.description !== undefined

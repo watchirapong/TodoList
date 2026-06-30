@@ -1,36 +1,30 @@
-# Todo List
+# Todo List Kanban
 
-A full-stack todo app built with Next.js 15, Tailwind CSS, and MongoDB.
+Kanban task board built with Next.js 15, Tailwind CSS, and MongoDB. Each browser gets a private board via an anonymous cookie — no login required.
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 18+
-- [MongoDB](https://www.mongodb.com/) running locally on port 27017
+- MongoDB — local **or** [MongoDB Atlas](https://www.mongodb.com/atlas) (recommended for Vercel)
 
-### Start MongoDB (macOS)
+### Local MongoDB (macOS)
 
 ```bash
 brew services start mongodb-community
 ```
 
-Or run `mongod` directly if you prefer a foreground process.
+### MongoDB Atlas
 
-The database `todolist` is created automatically on the first write.
+1. Create a free cluster
+2. **Database & Network Access** → add a DB user and allow IP `0.0.0.0/0` (for Vercel)
+3. Copy the connection string (Drivers → Node.js) and set `MONGODB_URI` in `.env.local`
 
 ## Setup
 
 ```bash
-# Install dependencies
 npm install
-
-# Copy environment variables
 cp .env.example .env.local
-```
-
-The default connection string in `.env.local`:
-
-```
-MONGODB_URI=mongodb://127.0.0.1:27017/todolist
+# Edit .env.local with your MONGODB_URI
 ```
 
 ## Development
@@ -41,25 +35,38 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Build
+## Deploy to Vercel
 
-```bash
-npm run build
-npm start
-```
+1. Push this repo to GitHub
+2. Import the project on [vercel.com](https://vercel.com)
+3. Add environment variable:
+   - `MONGODB_URI` = your Atlas connection string (include `/todolist` database name)
+4. Deploy
+
+No login setup needed — each visitor automatically gets a `todo_user_id` cookie and only sees their own tasks.
+
+## How user separation works
+
+- On first visit, the server sets an httpOnly cookie `todo_user_id` (random UUID)
+- All todos are stored with that `userId` in MongoDB
+- API routes filter by `userId` — users cannot read or modify each other's tasks
+- Clearing cookies = new empty board (old tasks remain in DB under the old id)
 
 ## Features
 
-- Add, complete, and delete tasks
-- Filter by All, Active, or Completed
-- Optimistic UI updates with error recovery
-- Tasks persist in MongoDB and survive page refresh
+- Kanban board: Not started / In progress / Done
+- Drag-and-drop between columns
+- Double-click to edit title, description, deadline
+- Red card styling when deadline is within 3 days
+- Optimistic UI updates
 
 ## API
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/todos` | List all todos (newest first) |
-| `POST` | `/api/todos` | Create a todo `{ text: string }` |
-| `PATCH` | `/api/todos/[id]` | Update `{ completed?, text? }` |
+| `GET` | `/api/todos` | List current user's todos |
+| `POST` | `/api/todos` | Create a todo |
+| `PATCH` | `/api/todos/[id]` | Update a todo |
 | `DELETE` | `/api/todos/[id]` | Delete a todo |
+
+All routes require the `todo_user_id` cookie (set automatically on first request).

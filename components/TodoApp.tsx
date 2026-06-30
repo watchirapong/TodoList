@@ -12,7 +12,7 @@ export default function TodoApp() {
   const fetchTodos = useCallback(async () => {
     try {
       setError(null);
-      const res = await fetch("/api/todos");
+      const res = await fetch("/api/todos", { credentials: "same-origin" });
       if (!res.ok) throw new Error("Failed to load todos");
       const data = await res.json();
       setTodos(data.todos);
@@ -51,6 +51,7 @@ export default function TodoApp() {
     try {
       const res = await fetch("/api/todos", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, status }),
       });
@@ -75,6 +76,7 @@ export default function TodoApp() {
     try {
       const res = await fetch(`/api/todos/${id}`, {
         method: "PATCH",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
@@ -109,6 +111,7 @@ export default function TodoApp() {
     try {
       const res = await fetch(`/api/todos/${id}`, {
         method: "PATCH",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -127,7 +130,10 @@ export default function TodoApp() {
     setTodos((prev) => prev.filter((t) => t._id !== id));
 
     try {
-      const res = await fetch(`/api/todos/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/todos/${id}`, {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
       if (!res.ok) throw new Error("Failed to delete todo");
     } catch {
       setTodos(previous);
@@ -141,7 +147,7 @@ export default function TodoApp() {
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Tasks</h1>
           <p className="mt-0.5 text-sm text-slate-500">
-            Drag cards between columns · double-click to edit
+            Your personal board · drag to move · tap or double-click to edit
           </p>
         </div>
         <span className="text-sm text-slate-500">{stats.total} total</span>

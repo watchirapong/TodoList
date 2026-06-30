@@ -7,6 +7,7 @@ import {
   parseDescriptionInput,
   serializeTodo,
 } from "@/lib/todo-utils";
+import { getOrCreateUserId } from "@/lib/user-id";
 import Todo from "@/models/Todo";
 
 export async function PATCH(
@@ -14,6 +15,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userId = await getOrCreateUserId();
     const { id } = await params;
 
     if (!mongoose.isValidObjectId(id)) {
@@ -91,7 +93,7 @@ export async function PATCH(
     }
 
     await connectDB();
-    const todo = await Todo.findByIdAndUpdate(id, updates, {
+    const todo = await Todo.findOneAndUpdate({ _id: id, userId }, updates, {
       new: true,
       runValidators: true,
     });
@@ -114,6 +116,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userId = await getOrCreateUserId();
     const { id } = await params;
 
     if (!mongoose.isValidObjectId(id)) {
@@ -121,7 +124,7 @@ export async function DELETE(
     }
 
     await connectDB();
-    const todo = await Todo.findByIdAndDelete(id);
+    const todo = await Todo.findOneAndDelete({ _id: id, userId });
 
     if (!todo) {
       return NextResponse.json({ error: "Todo not found" }, { status: 404 });

@@ -2,6 +2,11 @@ import mongoose, { Schema, models } from "mongoose";
 
 const TodoSchema = new Schema(
   {
+    userId: {
+      type: String,
+      required: true,
+      index: true,
+    },
     text: {
       type: String,
       required: true,
@@ -29,7 +34,7 @@ const TodoSchema = new Schema(
   }
 );
 
-TodoSchema.index({ createdAt: -1 });
-TodoSchema.index({ status: 1, createdAt: -1 });
+TodoSchema.index({ userId: 1, createdAt: -1 });
+TodoSchema.index({ userId: 1, status: 1, createdAt: -1 });
 
 export default models.Todo || mongoose.model("Todo", TodoSchema);
